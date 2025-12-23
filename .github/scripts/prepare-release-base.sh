@@ -97,8 +97,14 @@ git config user.email "bot@netdata.cloud"
 
 if [ "${EVENT_NAME}" = 'schedule' ] || [ "${EVENT_TYPE}" = 'nightly' ]; then
     echo "::notice::Preparing a nightly release build."
-    LAST_TAG=$(git describe --abbrev=0 --tags)
-    COMMITS_SINCE_RELEASE=$(git rev-list "${LAST_TAG}"..HEAD --count)
+    if ! LAST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null); then
+        # No tags found, use version from packaging/version or default
+        LAST_TAG=$(cut -f 1 -d '-' packaging/version 2>/dev/null || echo "v2.0.0")
+        echo "::notice::No tags found, using ${LAST_TAG} as base version."
+        COMMITS_SINCE_RELEASE=$(git rev-list HEAD --count)
+    else
+        COMMITS_SINCE_RELEASE=$(git rev-list "${LAST_TAG}"..HEAD --count)
+    fi
     NEW_VERSION="${LAST_TAG}-$((COMMITS_SINCE_RELEASE + 1))-nightly"
     LAST_VERSION_COMMIT="$(git rev-list -1 HEAD packaging/version)"
     HEAD_COMMIT="$(git rev-parse HEAD)"
