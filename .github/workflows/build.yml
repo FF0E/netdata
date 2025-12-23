@@ -189,6 +189,7 @@ jobs:
           retention-days: 30
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -236,6 +237,7 @@ jobs:
           echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -320,6 +322,7 @@ jobs:
           retention-days: 30
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -425,6 +428,7 @@ jobs:
           retention-days: 30
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -515,6 +519,7 @@ jobs:
           retention-days: 30
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -587,6 +592,7 @@ jobs:
         run: sh -x packaging/installer/kickstart.sh --build-only --dont-start-it --disable-telemetry --dont-wait
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -656,6 +662,7 @@ jobs:
         run: sh -x packaging/installer/kickstart.sh --static-only --dont-start-it --disable-telemetry
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -726,6 +733,7 @@ jobs:
                  ubuntu:latest /bin/sh -x /netdata/.github/scripts/run-updater-check.sh
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -837,6 +845,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -856,6 +865,7 @@ jobs:
           }}
       - name: Success Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'good'
           SLACK_FOOTER: ''
@@ -895,6 +905,7 @@ jobs:
           echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -964,6 +975,7 @@ jobs:
               /bin/sh -c './netdata-installer.sh --dont-wait --dont-start-it --one-time-build ${{ needs.file-check.outputs.skip-go }}'
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
@@ -1039,6 +1051,7 @@ jobs:
           ./packaging/runtime-check.sh
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
+        continue-on-error: true
         env:
           SLACK_COLOR: 'danger'
           SLACK_FOOTER: ''
