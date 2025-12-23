@@ -95,10 +95,7 @@ check_newer_patch_version() {
 git config user.name "netdatabot"
 git config user.email "bot@netdata.cloud"
 
-if [ "${REPO}" != "netdata/netdata" ] && [ -z "${RELEASE_TEST}" ]; then
-    echo "::notice::Not running in the netdata/netdata repository, not queueing a release build."
-    echo "run=false" >> "${GITHUB_OUTPUT}"
-elif [ "${EVENT_NAME}" = 'schedule' ] || [ "${EVENT_TYPE}" = 'nightly' ]; then
+if [ "${EVENT_NAME}" = 'schedule' ] || [ "${EVENT_TYPE}" = 'nightly' ]; then
     echo "::notice::Preparing a nightly release build."
     LAST_TAG=$(git describe --abbrev=0 --tags)
     COMMITS_SINCE_RELEASE=$(git rev-list "${LAST_TAG}"..HEAD --count)

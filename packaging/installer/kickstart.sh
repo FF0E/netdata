@@ -50,7 +50,7 @@ DISCUSSIONS_URL="https://github.com/netdata/netdata/discussions"
 DOCS_URL="https://learn.netdata.cloud/docs/"
 FORUM_URL="https://community.netdata.cloud/"
 INSTALL_DOC_URL="https://learn.netdata.cloud/docs/install-the-netdata-agent/one-line-installer-for-all-linux-systems"
-PACKAGES_SCRIPT="https://raw.githubusercontent.com/netdata/netdata/master/packaging/installer/install-required-packages.sh"
+PACKAGES_SCRIPT="https://raw.githubusercontent.com/FF0E/netdata/master/packaging/installer/install-required-packages.sh"
 PUBLIC_CLOUD_URL="https://app.netdata.cloud"
 RELEASE_INFO_URL="https://repo.netdata.cloud/releases"
 STABLE_REPO_URL_PREFIX="https://repository.netdata.cloud/repos/stable"
@@ -82,7 +82,7 @@ else
   NETDATA_DISABLE_TELEMETRY=0
 fi
 
-NETDATA_TARBALL_BASEURL="${NETDATA_TARBALL_BASEURL:-https://github.com/netdata/netdata-nightlies/releases}"
+NETDATA_TARBALL_BASEURL="${NETDATA_TARBALL_BASEURL:-https://github.com/FF0E/netdata/releases}"
 
 if echo "${0}" | grep -q 'kickstart-static64'; then
   NETDATA_REQUESTED_INSTALL_TYPE='static'

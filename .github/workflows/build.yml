@@ -748,27 +748,18 @@ jobs:
             && needs.file-check.outputs.run == 'true'
           }}
 
-  create-nightly: # Create a nightly build release in netdata/netdata-nightlies
+  create-nightly: # Create a nightly build release in the fork's own repo
     name: Create Nightly Release
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.type == 'nightly' && github.repository == 'netdata/netdata'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.type == 'nightly'
     needs:
       - prepare-upload
       - artifact-verification-dist
       - artifact-verification-static
     steps:
-      - name: Checkout Main Repo
-        id: checkout-main
+      - name: Checkout
+        id: checkout
         uses: actions/checkout@v6
-        with:
-          path: main
-      - name: Checkout Nightly Repo
-        id: checkout-nightly
-        uses: actions/checkout@v6
-        with:
-          repository: netdata/netdata-nightlies
-          path: nightlies
-          token: ${{ secrets.NETDATABOT_GITHUB_TOKEN }}
       - name: Retrieve Artifacts
         id: fetch
         uses: Wandalen/wretry.action@v3
@@ -782,89 +773,19 @@ jobs:
       - name: Prepare version info
         id: version
         run: |
-          # shellcheck disable=SC2129
-          echo "version=$(cat main/packaging/version)" >> "${GITHUB_OUTPUT}"
-          echo "commit=$(cd nightlies && git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+          echo "version=$(cat packaging/version)" >> "${GITHUB_OUTPUT}"
           echo "date=$(date +%F)" >> "${GITHUB_OUTPUT}"
       - name: Create Release
         id: create-release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: false
+          allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: 'final-artifacts/sha256sums.txt,final-artifacts/netdata-*.tar.gz,final-artifacts/netdata-*.gz.run,final-artifacts/netdata-*.msi'
-          owner: netdata
-          repo: netdata-nightlies
           body: Netdata nightly build for ${{ steps.version.outputs.date }}.
-          commit: ${{ steps.version.outputs.commit }}
           makeLatest: true
           tag: ${{ steps.version.outputs.version }}
-          token: ${{ secrets.NETDATABOT_GITHUB_TOKEN }}
-      - name: Checkout netdata main Repo # Checkout back to netdata/netdata repo to the update latest packaged versions
-        id: checkout-netdata
-        uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.NETDATABOT_GITHUB_TOKEN }}
-      - name: Init python environment for publish release metadata
-        uses: actions/setup-python@v6
-        id: init-python
-        with:
-          python-version: "3.12"
-      - name: Setup python environment
-        id: setup-python
-        run: |
-          pip install -r .github/scripts/modules/requirements.txt
-      - name: Check if the version is latest and published
-        id: check-latest-version
-        run: |
-          python .github/scripts/check_latest_versions.py  ${{ steps.version.outputs.version }}
-      - name: SSH setup
-        id: ssh-setup
-        if: github.event_name == 'workflow_dispatch' && github.repository == 'netdata/netdata' && steps.check-latest-version.outputs.versions_needs_update == 'true'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.NETDATABOT_PACKAGES_SSH_KEY }}
-          name: id_ecdsa
-          known_hosts: ${{ secrets.PACKAGES_KNOWN_HOSTS }}
-      - name: Sync release info to packages.netdata.cloud
-        id: sync-releases
-        continue-on-error: true
-        if: github.event_name == 'workflow_dispatch' && github.repository == 'netdata/netdata' && steps.check-latest-version.outputs.versions_needs_update == 'true'
-        run: |
-          .github/scripts/upload-new-version-tags.sh packages.netdata.cloud
-      - name: Sync release info to packages2.netdata.cloud
-        id: sync-releases2
-        if: github.event_name == 'workflow_dispatch' && github.repository == 'netdata/netdata' && steps.check-latest-version.outputs.versions_needs_update == 'true'
-        run: |
-          .github/scripts/upload-new-version-tags.sh packages.netdata.cloud
-      - name: Failure Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: 'danger'
-          SLACK_FOOTER: ''
-          SLACK_ICON_EMOJI: ':github-actions:'
-          SLACK_TITLE: 'Failed to draft release:'
-          SLACK_USERNAME: 'GitHub Actions'
-          SLACK_MESSAGE: |-
-              ${{ github.repository }}: Failed to create nightly release or attach artifacts.
-              Checkout netdata/netdata: ${{ steps.checkout-main.outcome }}
-              Checkout netdata/netdata-nightlies: ${{ steps.checkout-nightly.outcome }}
-              Fetch artifacts: ${{ steps.fetch.outcome }}
-              Prepare version info: ${{ steps.version.outcome }}
-              Create release: ${{ steps.create-release.outcome }}
-              Checkout back netdata/netdata: ${{ steps.checkout-netdata.outcome }}
-              Init python environment: ${{ steps.init-python.outcome }}
-              Setup python environment: ${{ steps.setup-python.outcome }}
-              Check the nearly published release against the advertised: ${{ steps.check-latest-version.outcome }}
-              Setup ssh: ${{ steps.ssh-setup.outcome }}
-              Sync release info to packages.netdata.cloud: ${{ steps.sync-releases.outcome }}
-              Sync release info to packages2.netdata.cloud: ${{ steps.sync-releases2.outcome }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: >-
-          ${{
-            failure()
-            && github.event_name == 'workflow_dispatch'
-          }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   normalize-tag: # Fix the release tag if needed
     name: Normalize Release Tag
@@ -885,7 +806,7 @@ jobs:
   upload-release: # Create the draft release and upload the build artifacts.
     name: Create Release Draft
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.type == 'release' && github.repository == 'netdata/netdata'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.type == 'release'
     needs:
       - artifact-verification-dist
       - artifact-verification-static
@@ -908,12 +829,12 @@ jobs:
         id: create-release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: false
+          allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: 'final-artifacts/sha256sums.txt,final-artifacts/netdata-*.tar.gz,final-artifacts/netdata-*.gz.run,final-artifacts/netdata-*.msi'
           draft: true
           tag: ${{ needs.normalize-tag.outputs.tag }}
-          token: ${{ secrets.NETDATABOT_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Failure Notification
         uses: rtCamp/action-slack-notify@v2
         env:
