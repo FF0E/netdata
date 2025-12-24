@@ -9,7 +9,7 @@ set -e
 
 BUILDARCH="${1}"
 NAME="${NAME:-netdata}"
-VERSION="${VERSION:-"$(git describe)"}"
+VERSION="${VERSION:-"$(git describe 2>/dev/null || cat packaging/version)"}"
 BASENAME="$NAME-$BUILDARCH-$VERSION"
 
 prepare_build() {

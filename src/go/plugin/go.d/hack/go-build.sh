@@ -33,7 +33,7 @@ getarch() {
 
 WHICH="$1"
 
-VERSION="${TRAVIS_TAG:-$(git describe --tags --always --dirty)}"
+VERSION="${TRAVIS_TAG:-$(git describe --tags --always --dirty 2>/dev/null || cat packaging/version 2>/dev/null || echo unknown)}"
 
 GOLDFLAGS=${GLDFLAGS:-}
 GOLDFLAGS="$GOLDFLAGS -w -s -X github.com/netdata/netdata/go/plugins/pkg/buildinfo.Version=$VERSION"
