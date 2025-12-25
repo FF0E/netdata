@@ -16780,4 +16780,6 @@
 - Add continue-on-error to Slack notifications and remove redundant failure notifications in release workflow
 - Improve nightly release handling by using default version when no tags are found
 - Refactor changelog generation to handle missing first tag gracefully
+- Handle missing version information gracefully in build scripts
+- Merge branch 'master' of https://github.com/FF0E/netdata
 
